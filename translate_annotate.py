@@ -19,7 +19,7 @@ def main():
         return
             
 
-        _file = fn.split ('.')[1]
+    _file = fn.split ('.')[1]
 
     try:
         f = open (str(fn), 'r')
