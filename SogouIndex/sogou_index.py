@@ -16,10 +16,10 @@ def Y(text, end='\n'): print('\033[0;33m{}\033[0m'.format(text), end=end)
 def R(text, end='\n'): print('\033[0;31m{}\033[0m'.format(text), end=end)
 
 
-try:
-    dataType = sys.argv[2]
-except IndexError as e:
-    dataType = 'all'
+#try:
+#    dataType = sys.argv[2]
+#except IndexError as e:
+#    dataType = 'all'
 try:
     kwdNamesStr = sys.argv[1]
 except IndexError as e:
@@ -27,12 +27,12 @@ except IndexError as e:
     Y('''Search for heat index from Sogou.
     
     Usage:
-        index <Names> [all pc wap] [week month year]
+        index <Names> [week month year]
 
     ''') # 无视这个(:。。。。
     sys.exit()
 try:
-    timePeriodType = sys.argv[3]
+    timePeriodType = sys.argv[2]
 except IndexError as e:
     timePeriodType = 'MONTH'
 
@@ -43,15 +43,15 @@ class sogouIndex:
 
         self.url = 'http://index.sogou.com/getRenderData'
         all = 'SEARCH_ALL'
-        pc = 'SEARCH_PC'
-        wap = 'SEARCH_WAP'
+        #pc = 'SEARCH_PC'
+        #wap = 'SEARCH_WAP'
         self.params = {
                 'kwdNamesStr': kwdNamesStr,
                 'timePeriodType': timePeriodType.upper(),
                 'dataType': all,
                 'queryType': 'INPUT',
                 }
-        self.settings()
+        # self.settings() 没有加入版本选择函数，因为懒癌犯了-_-
         
         self.pv = []
         self.date = []
@@ -137,23 +137,45 @@ class sogouIndex:
         date_end = str(self.date[-1]) # 获取日期结尾
         end = date_end[:4] + '-' + date_end[4:-2] + '-' + date_end[-2:]
         
+        if not (self.kwdName and self.avgPv and self.ratioMonth and self.ratioChain and self.avgWapPv and self.ratioWapChain and self.ratioWapMonth):
+            R('＊解析出现异常，结果有误，请重试，如再次出现此类消息请截图发送至邮箱:<zckuna@gmail.com>')
+            sys.exit()
+            
+        if len(self.ratioMonth)>1:
+            rm_color = 32 if float(self.ratioMonth.split('%')[0]) >= 0 else 31
+        else: rm_color = 31
         
+        if len(self.ratioMonth)>1:
+            rc_color = 32 if float(self.ratioChain.split('%')[0]) >= 0 else 31
+        else: rc_color = 31
+        
+        if len(self.ratioMonth)>1:
+            rwm_color = 32 if float(self.ratioWapMonth.split('%')[0]) >= 0 else 31
+        else: rwm_color = 31
+        
+        if len(self.ratioMonth)>1:
+            rwc_color = 32 if float(self.ratioWapChain.split('%')[0]) >= 0 else 31
+        else: rwc_color = 31
+        
+        
+        #else:    
         print ('''\n\033[0;36m关键字\033[0m：\033[0;33m{kwd}\033[0m\n\033[0;36m时间\033[0m：\033[0;33m{date}\033[0m\n\033[0;36m整体搜索指数/平均值\033[0m：\033[0;32m{avgPv}\033[0m\n\033[0;36m整体同比\033[0m：\033[0;{rm_color}m{ratioMonth}\033[0m\n\033[0;36m整体环比\033[0m：\033[0;{rc_color}m{ratioChain}\033[0m\n\033[0;36m移动搜索指数\033[0m：\033[0;{awp_color}m{avgWapPv}\033[0m\n\033[0;36m移动同比\033[0m：\033[0;{rwm_color}m{ratioWapMonth}\033[0m\n\033[0;36m移动环比\033[0m：\033[0;{rwc_color}m{ratioWapChain}\033[0m\n'''
-               .format(
-                   kwd = self.kwdName,
-                   date = start + '~' + end,
-                   avgPv = self.avgPv,
-                   rm_color = 32 if float(self.ratioMonth.split('%')[0]) >= 0 else 31, # 判断数据是否大于等于０来决定输出的颜色是红色还是绿色
-                   ratioMonth = self.ratioMonth,
-                   rc_color = 32 if float(self.ratioChain.split('%')[0]) >= 0 else 31,
-                   ratioChain = self.ratioChain,
-                   awp_color = 32 if self.avgWapPv >= 0 else 31,
-                   avgWapPv = self.avgWapPv,
-                   rwm_color = 32 if float(self.ratioWapMonth.split('%')[0]) >= 0 else 31,
-                   ratioWapMonth = self.ratioWapMonth,
-                   rwc_color = 32 if float(self.ratioWapChain.split('%')[0]) >= 0 else 31,
-                   ratioWapChain = self.ratioWapChain
-                   ))
+                .format(
+                    kwd = self.kwdName,
+                    date = start + '~' + end,
+                    avgPv = self.avgPv,
+                    rm_color = rm_color, 
+                    ratioMonth = self.ratioMonth,
+                    rc_color = rc_color,
+                    ratioChain = self.ratioChain,
+                    awp_color = 32,
+                    avgWapPv = self.avgWapPv,
+                    rwm_color = rwm_color,
+                    ratioWapMonth = self.ratioWapMonth,
+                    rwc_color = rwc_color,
+                    ratioWapChain = self.ratioWapChain
+                       ))
+        
         
         # 以下是保存文件代码 The following is to save the file code. 
         if os.path.exists('sogouPv.txt'): os.remove('sogouPv.txt')
