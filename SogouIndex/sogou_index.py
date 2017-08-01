@@ -23,12 +23,11 @@ except IndexError as e:
 try:
     kwdNamesStr = sys.argv[1]
 except IndexError as e:
-    R('＊请输入正确的关键字')
+    R('请输入正确的关键字')
     Y('''Search for heat index from Sogou.
     
     Usage:
-        index <Names> <Data> <TimePeriod>
-        
+        index <Names> [all pc wap] [week month year]
 
     ''') # 无视这个(:。。。。
     sys.exit()
